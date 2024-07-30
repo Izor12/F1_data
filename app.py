@@ -17,10 +17,20 @@ st.set_page_config(page_title="F1 Data Analysis",
 
 
 
-st.header('F1 Data Analysis',divider='gray')
+st.header('F1 Data Analysis Qualifying',divider='gray')
 
-def ret_drivers(age,option):
-    return 
+def ret_drivers(year,race,sesh):
+    session = fastf1.get_session(year,race,sesh)
+    session.load()
+    drivers = []
+    driver_displ = []
+    for i in session.drivers:
+        drivers.append(session.get_driver(i)["Abbreviation"])
+        driver_displ.append("-".join([session.get_driver(i)["Abbreviation"],session.get_driver(i)["FullName"]])) 
+    return [drivers,driver_displ]
+def ret_races(year):
+    session = fastf1.get_event_schedule(year)
+    return list(session["Location"])
 class quali_two:
     def __init__(self,driver1,driver2,session):
         self.driver1 = driver1
@@ -109,12 +119,27 @@ class quali_two:
         ax[1].legend(loc = "lower left")
         st.pyplot(fig)
 
-age = st.slider("How old are you?", 1950, 2024, datetime.now().year)
-option = st.selectbox(
-    "How would you like to be contacted?",
-    ([1,2,3,4,54]),
+year = st.slider("Select an year", 1950, 2024, datetime.now().year)
+
+event = st.selectbox(
+    "Select a Race",
+    (ret_races(year)),
 )
-spa = quali_two("HAM","VER",[2024,"SPA","R"])
+
+temp = ret_drivers(year,event,"Q")
+drivers  = temp[0]
+driver_disp = temp[1]
+
+
+driver1 = st.selectbox(
+    "Select a driver",
+    (driver_disp),
+)
+driver2= st.selectbox(
+    "Select a Race",
+    (driver_disp),
+)
+spa = quali_two(driver1.split("-")[0],driver2.split("-")[0],[year,event,"Q"])
 
 print(spa.quali.event)
 spa.telemetery_driver1()

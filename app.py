@@ -10,8 +10,8 @@ from datetime import datetime
 
 #%matplotlib inline
 fastf1.plotting.setup_mpl(color_scheme="fastf1")
-#ff1.Cache.enable_cache(r"D:\fastf1_cache/")
-ff1.Cache.disabled()
+ff1.Cache.enable_cache()
+
 st.set_page_config(page_title="F1 Data Analysis",
                    page_icon= ':racing_car:',)
 

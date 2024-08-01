@@ -130,6 +130,11 @@ temp = ret_drivers(year,event,"Q")
 drivers  = temp[0]
 driver_disp = temp[1]
 
+driver1 = st.selectbox(
+    "Select a Lap",
+    (["Absolutely Fastest lap in Qualifying","Q3 fastest","Q2 Fastest","Q1 Fastest"]),
+)
+
 
 driver1 = st.selectbox(
     "Select a driver",

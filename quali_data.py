@@ -23,7 +23,7 @@ df[df['RPM']>0]
 dic["GR"] = df[(df['Time'] >"0 days 01:21:35.888000")& (df["Time"]< "0 days 01:23:01.707000")]
 dic["GR"]['Cumulative_Time_Diff'] = dic["GR"]['Time_Diff'].cumsum()
 
-dic["GR"]['Time_Diff_Millis'] = dic["GR"]['Time_Diff'].dt.microseconds // 1000 + dic["GR"]['Time_Diff'].dt.seconds * 1000
+dic["GR"]['Time_Diff_Millis'] = dic["GR"]['Time_Diff'].dt.microse conds // 1000 + dic["GR"]['Time_Diff'].dt.seconds * 1000
 dic["GR"]['Cumulative_Time_Diff_Millis'] = dic["GR"]['Time_Diff_Millis'].cumsum()/1000
 
 

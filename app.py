@@ -7,6 +7,7 @@ import fastf1 as ff1
 import fastf1.plotting 
 import pandas as pd
 from datetime import datetime
+import numpy as np
 
 #%matplotlib inline
 fastf1.plotting.setup_mpl(color_scheme="fastf1")
@@ -33,6 +34,65 @@ def ret_races(year):
     return list(session["Location"])
 
 
+class Races:
+    def __init__(self,driver1,driver2,session):
+
+        self.driver1 = driver1
+        self.driver2 = driver2
+        self.session = session
+        race = ff1.get_session(self.session[0],self.session[1],self.session[2])
+        race.load(telemetry=True, laps = True)
+        self.race = race
+        self.laps_driver1 = race.laps.pick_driver(self.driver1)
+        self.laps_driver2 = race.laps.pick_driver(self.driver2)
+    def convert(self,seconds):
+        minutes = seconds // 60
+        seconds = seconds % 60
+        milliseconds = (seconds - int(seconds)) * 1000
+        seconds = int(seconds)        
+    def data(self):
+        driver1_laps = self.race.laps[self.race.laps["Driver"] == self.driver1]
+        driver2_laps = self.race.laps[self.race.laps["Driver"] == self.driver2]
+        return [driver1_laps,driver2_laps]
+    def tel(self):
+        fig = plt.figure()
+        axes = fig.add_axes([0.1, 0.1, 2, 0.8]) # main axes
+        axes.set_ylabel("LapTime")
+        axes.set_xlabel("Laps")
+        driver1_laps = self.data()[0]
+        driver2_laps = self.data()[1]
+        axes.set_title("{} vs {} race laptimes".format(self.driver1,self.driver2))
+        axes.set_xticks(np.arange(0,self.race.total_laps+1,2))
+        
+        axes.plot(driver1_laps["LapNumber"],driver1_laps["LapTime"],"ro-",label = self.driver1)
+        axes.plot(driver2_laps["LapNumber"],driver2_laps["LapTime"],"bo-",label = self.driver2)
+        axes.legend()
+        axes.grid(axis = "y",color='gray', linestyle='-', linewidth=0.5)
+        st.pyplot(fig)
+    def tel_dri1(self):
+        fig = plt.figure()
+        axes = fig.add_axes([0.1, 0.1, 2, 0.8]) # main axes
+        axes.set_ylabel("LapTime")
+        axes.set_xlabel("Laps")
+        driver1_laps = self.data()[0]
+        
+        axes.set_title("{} race laptimes".format(self.driver1))
+        axes.set_xticks(np.arange(0,self.race.total_laps+1,2))
+        axes.plot(driver1_laps["LapNumber"],driver1_laps["LapTime"],"ro-",label = self.driver1)
+        axes.legend()
+        st.pyplot(fig)
+    def tel_dri2(self):
+        fig = plt.figure()
+        axes = fig.add_axes([0.1, 0.1, 2, 0.8]) # main axes
+        axes.set_ylabel("LapTime")
+        axes.set_xlabel("Laps")
+        driver2_laps = self.data()[1]
+
+        axes.set_title("{} race laptimes".format(self.driver2))
+        axes.set_xticks(np.arange(0,self.race.total_laps+1,2))
+        axes.plot(driver2_laps["LapNumber"],driver2_laps["LapTime"],"ro-",label = self.driver2)
+        axes.legend()
+        st.pyplot(fig)
 
 class quali_two:
     def __init__(self,driver1,driver2,session,lap):
@@ -189,15 +249,16 @@ event = st.selectbox(
     "Select a Race",
     (ret_races(year)),
 )
-
-temp = ret_drivers(year,event,"Q")
+sesh_dic = {"Qualifying":"Q","Race":"R"}
+session = st.selectbox(
+    "Select a session",
+    (sesh_dic.keys()),
+)
+temp = ret_drivers(year,event,sesh_dic[session])
 drivers  = temp[0]
 driver_disp = temp[1]
 
-lap = st.selectbox(
-    "Select a Lap",
-    (["Absolutely Fastest lap in Qualifying","Q3","Q2","Q1"]),
-)
+
 
 
 driver1 = st.selectbox(
@@ -208,7 +269,17 @@ driver2= st.selectbox(
     "Select a driver 2",
     (driver_disp),
 )
-spa = quali_two(driver1.split("-")[0],driver2.split("-")[0],[year,event,"Q"],lap)
-spa.telemetery_driver1()
-spa.telemetery_driver2()
-spa.compare()
+if session == "Qualifying":
+    lap = st.selectbox(
+    "Select a Lap",
+    (["Absolutely Fastest lap in Qualifying","Q3","Q2","Q1"]),
+)
+    spa = quali_two(driver1.split("-")[0],driver2.split("-")[0],[year,event,sesh_dic[session]],lap)
+    spa.telemetery_driver1()
+    spa.telemetery_driver2()
+    spa.compare()
+if session == "Race":
+    rce = Races(driver1.split("-")[0],driver2.split("-")[0],[year,event,sesh_dic[session]])
+    rce.tel_dri1()
+    rce.tel_dri2()
+    rce.tel()
